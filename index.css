@@ -26,9 +26,8 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: "JetBrains Mono", "Share Tech Mono", monaco, courier;
-  user-select: none;
-  scrollbar-width: none;
+  font-family: "JetBrains Mono", "Share Tech Mono", monaco, courier !important;
+ 
 }
 
 html, body {
@@ -47,6 +46,8 @@ body {
   padding: 0;
   margin: 0;
   transition: background-color 0.3s, color 0.3s;
+   user-select: none;
+  scrollbar-width: none;
 }
 
 #app-root {
