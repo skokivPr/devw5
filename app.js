@@ -10,26 +10,26 @@ const appData = {
             {
                 title: 'City at Dusk',
                 subtitle: 'Urban landscape as night falls.',
-                lightImage: 'l-img/l1.png',
-                darkImage: 'd-img/d1.png'
+                lightImage: 'https://raw.githubusercontent.com/skokivPr/devw5/refs/heads/main/l-img/l1.png',
+                darkImage: 'https://raw.githubusercontent.com/skokivPr/devw5/refs/heads/main/d-img/d1.png'
             },
             {
                 title: 'Mountain Range',
                 subtitle: 'Sunlight over the peaks.',
-                lightImage: 'l-img/l2.png',
-                darkImage: 'd-img/d2.png'
+                lightImage: 'https://raw.githubusercontent.com/skokivPr/devw5/refs/heads/main/l-img/l2.png',
+                darkImage: 'https://raw.githubusercontent.com/skokivPr/devw5/refs/heads/main/d-img/d2.png'
             },
             {
                 title: 'Forest Path',
                 subtitle: 'A journey through the woods.',
-                lightImage: 'l-img/l3.png',
-                darkImage: 'd-img/d3.png'
+                lightImage: 'https://raw.githubusercontent.com/skokivPr/devw5/refs/heads/main/l-img/l3.png',
+                darkImage: 'https://raw.githubusercontent.com/skokivPr/devw5/refs/heads/main/d-img/d3.png'
             },
             {
                 title: 'Coastal View',
                 subtitle: 'Waves crashing on the shore.',
-                lightImage: 'l-img/l4.png',
-                darkImage: 'd-img/d4.png'
+                lightImage: 'https://raw.githubusercontent.com/skokivPr/devw5/refs/heads/main/l-img/l4.png',
+                darkImage: 'https://raw.githubusercontent.com/skokivPr/devw5/refs/heads/main/d-img/d4.png'
             }
         ]
     },
@@ -44,34 +44,43 @@ const appData = {
                 title: 'THEME',
                 subtitle: 'DARK MODE',
                 icon: 'fas fa-moon',
-                classes: ['bg']
+                classes: ['icon-3d'],
+                status: 'READY',
+                footer: 'SYSTEM',
             },
             {
-                code: 'SET-001',
-                title: 'SETTINGS',
-                subtitle: 'System Config',
-                icon: 'fas fa-cog'
+                code: 'EVA-001',
+                title: 'EVACUATION LIST',
+                subtitle: 'Driver List & Protocol',
+                icon: 'fas fa-cog',
+                classes: ['icon-3d'],
+                status: 'ACTIVE',
+                footer: 'Truck',
             },
             {
                 id: 'login-toggle',
                 code: 'LOG-002',
                 title: 'LOGIN',
                 subtitle: 'Access Console',
-                icon: 'fas fa-sign-in-alt'
+                icon: 'fas fa-sign-in-alt',
+                status: 'READY',
+                footer: 'ACCESS',
             },
             {
                 id: 'addons-toggle',
                 code: 'ADD-003',
                 title: 'ADDONS',
                 subtitle: 'Manage Extensions',
-                icon: 'fas fa-puzzle-piece'
+                icon: 'fas fa-puzzle-piece',
+                status: 'READY',
+                footer: 'TOOLS',
             },
             {
                 code: 'COM-001',
                 title: 'CHAT OPS',
                 subtitle: 'Team Communication',
                 icon: 'fas fa-comments',
-                status: '',
+                status: 'READY',
                 footer: 'COMMUNICATION'
             },
             {
@@ -79,7 +88,7 @@ const appData = {
                 title: 'QUIP',
                 subtitle: 'Document Collaboration',
                 icon: 'fas fa-users-cog',
-                status: '',
+                status: 'LIVE',
                 footer: 'COLLABORATION'
             },
             {
@@ -192,7 +201,7 @@ const appData = {
                 icon: 'fas fa-search',
                 status: 'SEARCH',
                 footer: 'DOCK OPERATIONS',
-                class: 'en' // Add this line
+                class: 'dock-op-card'
             },
             {
                 code: 'DCK-017',
@@ -201,7 +210,7 @@ const appData = {
                 icon: 'fas fa-user-tie',
                 status: 'ACTIVE',
                 footer: 'DOCK OPERATIONS',
-                class: 'en'
+                class: 'dock-op-card'
             },
             {
                 code: 'DEV-014',
@@ -247,8 +256,10 @@ class CommandCenter {
         this.clockInterval = null;
         this.consoleClockInterval = null;
         this.uptimeInterval = null;
+        this.loginCountdownInterval = null;
         this.areAddonsLoaded = false;
         this.startTime = Date.now();
+        this.CORRECT_PASSCODE = '1234';
 
         this.init();
     }
@@ -303,128 +314,57 @@ class CommandCenter {
         // Time and date display
         const timeDisplay = document.createElement('div');
         timeDisplay.id = 'time-display';
-        timeDisplay.style.cssText = `
-            position: absolute;
-            top: 50px;
-            right: 2rem;
-            font-size: 3rem;
-            font-weight: 700;
-            color: var(--text-color);
-            background: rgba(0, 0, 0, 0.5);
-            padding: 0.5rem 1rem;
-            border: 1px solid var(--border-color);
-            z-index: 11;
-            font-family: "JetBrains Mono", "Share Tech Mono", monaco, courier;
-        `;
+        timeDisplay.className = 'time-display';
 
         const dateDisplay = document.createElement('div');
         dateDisplay.id = 'date-display';
-        dateDisplay.style.cssText = `
-            position: absolute;
-            top: 120px;
-            right: 2rem;
-            font-size: 1.2rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            font-weight: 700;
-            z-index: 11;
-        `;
+        dateDisplay.className = 'date-display';
 
         // Carousel container
         const carouselContainer = document.createElement('div');
-        carouselContainer.style.cssText = `
-            position: relative;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-        `;
+        carouselContainer.className = 'carousel-container';
 
         const carouselInner = document.createElement('div');
         carouselInner.id = 'carousel-inner';
-        carouselInner.style.cssText = `
-            display: flex;
-            width: ${appData.visualFeed.items.length * 100}%;
-            height: 100%;
-            transition: transform 0.5s ease;
-        `;
+        carouselInner.className = 'carousel-inner';
+        // Set dynamic width using CSS custom property
+        const totalItems = appData.visualFeed.items.length;
+        carouselInner.style.setProperty('--carousel-width', `${totalItems * 100}%`);
 
         // Create carousel items
         appData.visualFeed.items.forEach((item, index) => {
             const carouselItem = document.createElement('div');
             carouselItem.className = 'carousel-item';
             carouselItem.setAttribute('data-index', index);
+            // Set dynamic width using CSS custom property
+            carouselItem.style.setProperty('--carousel-item-width', `${100 / totalItems}%`);
 
             // Get initial image based on current theme
             const currentTheme = document.documentElement.getAttribute('theme') || 'dark';
             const imageUrl = currentTheme === 'dark' ? item.darkImage : item.lightImage;
 
-            carouselItem.style.cssText = `
-                width: ${100 / appData.visualFeed.items.length}%;
-                height: 100%;
-                position: relative;
-            `;
-
             // Create blur background layer
             const blurLayer = document.createElement('div');
-            blurLayer.style.cssText = `
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background-image: url('${imageUrl}');
-                background-size: cover;
-                background-position: center;
-                background-repeat: no-repeat;
-                filter: blur(5px);
-                opacity: 0.7;
-                z-index: 1;
-            `;
+            blurLayer.className = 'carousel-blur-layer';
+            blurLayer.style.backgroundImage = `url('${imageUrl}')`;
 
             // Create main image layer
             const mainImageLayer = document.createElement('div');
-            mainImageLayer.style.cssText = `
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                width: 60%;
-                height: 60%;
-                background-image: url('${imageUrl}');
-                background-size: contain;
-                background-position: center;
-                background-repeat: no-repeat;
-                z-index: 2;
-            `;
+            mainImageLayer.className = 'carousel-main-image';
+            mainImageLayer.style.backgroundImage = `url('${imageUrl}')`;
 
             carouselItem.appendChild(blurLayer);
             carouselItem.appendChild(mainImageLayer);
 
             const itemOverlay = document.createElement('div');
-            itemOverlay.style.cssText = `
-                position: absolute;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
-                padding: 2rem;
-                color: var(--text-color);
-                z-index: 3;
-            `;
+            itemOverlay.className = 'carousel-item-overlay';
 
             const itemTitle = document.createElement('div');
-            itemTitle.style.cssText = `
-                font-size: 1.5rem;
-                font-weight: 700;
-                margin-bottom: 0.5rem;
-            `;
+            itemTitle.className = 'carousel-item-title';
             itemTitle.textContent = item.title;
 
             const itemSubtitle = document.createElement('div');
-            itemSubtitle.style.cssText = `
-                font-size: 1rem;
-                color: var(--text-muted);
-            `;
+            itemSubtitle.className = 'carousel-item-subtitle';
             itemSubtitle.textContent = item.subtitle;
 
             itemOverlay.appendChild(itemTitle);
@@ -436,54 +376,18 @@ class CommandCenter {
         // Navigation buttons
         const prevBtn = document.createElement('button');
         prevBtn.id = 'prev-btn';
+        prevBtn.className = 'carousel-nav-btn carousel-prev-btn';
         prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
-        prevBtn.style.cssText = `
-            position: absolute;
-            left: 0rem;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid var(--border-color);
-            color: var(--highlight-color);
-            width: 40px;
-            height: 80px;
-            border-radius: 0%;
-            cursor: pointer;
-            z-index: 12;
-            transition: all 0.3s ease;
-        `;
 
         const nextBtn = document.createElement('button');
         nextBtn.id = 'next-btn';
+        nextBtn.className = 'carousel-nav-btn carousel-next-btn';
         nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
-        nextBtn.style.cssText = `
-            position: absolute;
-            right: 0rem;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid var(--border-color);
-            color: var(--highlight-color);
-            width: 40px;
-            height: 80px;
-            border-radius: 0%;
-            cursor: pointer;
-            z-index: 12;
-            transition: all 0.3s ease;
-        `;
 
         // Dot indicators
         const dotIndicators = document.createElement('div');
         dotIndicators.id = 'dot-indicators';
-        dotIndicators.style.cssText = `
-            position: absolute;
-            bottom: 1rem;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 0.5rem;
-            z-index: 12;
-        `;
+        dotIndicators.className = 'carousel-dots';
 
         carouselContainer.appendChild(carouselInner);
         carouselContainer.appendChild(prevBtn);
@@ -568,12 +472,39 @@ class CommandCenter {
         if (cardData.id) {
             card.id = cardData.id;
         }
+        // Card header (for cards with status)
+        if (cardData.status !== undefined) {
+            const header = document.createElement('div');
+            header.className = 'card-header';
+
+            const codeSpan = document.createElement('span');
+            codeSpan.textContent = cardData.code;
+
+            const statusSpan = document.createElement('span');
+            statusSpan.className = 'card-status';
+            statusSpan.textContent = cardData.status;
+
+            header.appendChild(codeSpan);
+            header.appendChild(statusSpan);
+            card.appendChild(header);
+        }
 
         const body = document.createElement('div');
         body.className = 'card-body';
 
-        const icon = document.createElement('i');
-        icon.className = `${cardData.icon} card-icon`;
+        const icon = document.createElement('div');
+        icon.className = `card-icon icon-3d`;
+
+        // Create shadow layer
+        const shadowLayer = document.createElement('i');
+        shadowLayer.className = `${cardData.icon} shadow-layer`;
+
+        // Create main layer
+        const mainLayer = document.createElement('i');
+        mainLayer.className = `${cardData.icon} main-layer`;
+
+        icon.appendChild(shadowLayer);
+        icon.appendChild(mainLayer);
 
         const titleSection = document.createElement('div');
         titleSection.className = 'card-title-section';
@@ -636,8 +567,19 @@ class CommandCenter {
         const body = document.createElement('div');
         body.className = 'card-body';
 
-        const icon = document.createElement('i');
-        icon.className = `${cardData.icon} card-icon`;
+        const icon = document.createElement('div');
+        icon.className = `card-icon icon-3d`;
+
+        // Create shadow layer
+        const shadowLayer = document.createElement('i');
+        shadowLayer.className = `${cardData.icon} shadow-layer`;
+
+        // Create main layer
+        const mainLayer = document.createElement('i');
+        mainLayer.className = `${cardData.icon} main-layer`;
+
+        icon.appendChild(shadowLayer);
+        icon.appendChild(mainLayer);
 
         const titleSection = document.createElement('div');
         titleSection.className = 'card-title-section';
@@ -707,6 +649,7 @@ class CommandCenter {
         header.appendChild(title);
         header.appendChild(closeBtn);
 
+        // Login form
         const form = document.createElement('form');
         form.id = 'login-form';
 
@@ -745,8 +688,29 @@ class CommandCenter {
         form.appendChild(passcodeGroup);
         form.appendChild(submitBtn);
 
+        // Login success view
+        const successView = document.createElement('div');
+        successView.id = 'login-success-view';
+        successView.className = 'login-success-view hidden';
+
+        const successTitle = document.createElement('h3');
+        successTitle.innerHTML = '<i class="fas fa-check-circle"></i> Authentication Successful';
+
+        const successMessage = document.createElement('p');
+        successMessage.textContent = 'Access granted. Redirecting to DevOps Panel...';
+
+        const countdownTimer = document.createElement('div');
+        countdownTimer.id = 'countdown-timer';
+        countdownTimer.className = 'countdown-timer';
+        countdownTimer.textContent = '3';
+
+        successView.appendChild(successTitle);
+        successView.appendChild(successMessage);
+        successView.appendChild(countdownTimer);
+
         content.appendChild(header);
         content.appendChild(form);
+        content.appendChild(successView);
         modal.appendChild(content);
 
         return modal;
@@ -789,8 +753,7 @@ class CommandCenter {
         modal.className = 'modal hidden';
 
         const content = document.createElement('div');
-        content.className = 'modal-content';
-        content.style.maxWidth = '700px';
+        content.className = 'modal-content modal-content-wide';
 
         const header = document.createElement('div');
         header.className = 'modal-header';
@@ -859,8 +822,7 @@ class CommandCenter {
         modal.className = 'modal hidden';
 
         const content = document.createElement('div');
-        content.className = 'modal-content';
-        content.style.maxWidth = '600px';
+        content.className = 'modal-content modal-content-medium';
 
         const header = document.createElement('div');
         header.className = 'modal-header';
@@ -957,13 +919,13 @@ class CommandCenter {
         statusDiv.innerHTML = '<span class="status-indicator"></span>System Online';
 
         const versionSpan = document.createElement('span');
+        versionSpan.className = 'footer-version';
         versionSpan.textContent = 'v2.1.0';
-        versionSpan.style.color = 'var(--text-muted)';
 
         const uptimeSpan = document.createElement('span');
         uptimeSpan.id = 'uptime-display';
+        uptimeSpan.className = 'footer-uptime';
         uptimeSpan.textContent = 'Uptime: 00:00:00';
-        uptimeSpan.style.color = 'var(--text-muted)';
 
         centerSection.appendChild(statusDiv);
         centerSection.appendChild(versionSpan);
@@ -1014,20 +976,20 @@ class CommandCenter {
         if (loginToggle) {
             loginToggle.addEventListener('click', (e) => {
                 e.preventDefault();
-                this.openModal('login-modal');
+                this.openLoginModal();
             });
         }
 
         if (loginCloseBtn) {
             loginCloseBtn.addEventListener('click', () => {
-                this.closeModal('login-modal');
+                this.closeLoginModal();
             });
         }
 
         if (loginModal) {
             loginModal.addEventListener('click', (e) => {
                 if (e.target === loginModal) {
-                    this.closeModal('login-modal');
+                    this.closeLoginModal();
                 }
             });
         }
@@ -1035,10 +997,7 @@ class CommandCenter {
         if (loginForm) {
             loginForm.addEventListener('submit', (e) => {
                 e.preventDefault();
-                const operatorId = document.getElementById('operator-id').value;
-                console.log(`Authentication attempt for Operator ID: ${operatorId}`);
-                this.closeModal('login-modal');
-                loginForm.reset();
+                this.handleLogin();
             });
         }
 
@@ -1123,7 +1082,7 @@ class CommandCenter {
         // Global escape key handler for all modals
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
-                this.closeModal('login-modal');
+                this.closeLoginModal();
                 this.closeModal('addons-modal');
                 this.closeModal('help-modal');
                 this.closeModal('about-modal');
@@ -1170,10 +1129,25 @@ class CommandCenter {
 
         // Update theme toggle icon
         if (themeIcon) {
-            if (theme === 'dark') {
-                themeIcon.className = 'fas fa-moon card-icon';
+            const shadowLayer = themeIcon.querySelector('.shadow-layer');
+            const mainLayer = themeIcon.querySelector('.main-layer');
+
+            if (shadowLayer && mainLayer) {
+                // 3D icon structure
+                if (theme === 'dark') {
+                    shadowLayer.className = 'fas fa-moon shadow-layer';
+                    mainLayer.className = 'fas fa-moon main-layer';
+                } else {
+                    shadowLayer.className = 'fas fa-sun shadow-layer';
+                    mainLayer.className = 'fas fa-sun main-layer';
+                }
             } else {
-                themeIcon.className = 'fas fa-sun card-icon';
+                // Fallback for non-3D icons
+                if (theme === 'dark') {
+                    themeIcon.className = 'fas fa-moon card-icon';
+                } else {
+                    themeIcon.className = 'fas fa-sun card-icon';
+                }
             }
         }
 
@@ -1218,15 +1192,7 @@ class CommandCenter {
         // Utwórz wskaźniki kropek
         for (let i = 0; i < totalItems; i++) {
             const dot = document.createElement('button');
-            dot.style.cssText = `
-                width: 50px;
-                height: 5px;
-                border-radius: 0%;
-                border: 1px solid var(--highlight-color);
-                background: transparent;
-                cursor: pointer;
-                transition: all 0.3s ease;
-            `;
+            dot.className = 'carousel-dot';
             dot.setAttribute('data-index', i);
             dot.addEventListener('click', () => {
                 this.goToSlide(i);
@@ -1242,9 +1208,9 @@ class CommandCenter {
             carouselInner.style.transform = `translateX(-${this.currentFeedIndex * 100 / totalItems}%)`;
             dots.forEach((dot, index) => {
                 if (index === this.currentFeedIndex) {
-                    dot.style.backgroundColor = 'var(--highlight-color)';
+                    dot.classList.add('active');
                 } else {
-                    dot.style.backgroundColor = 'transparent';
+                    dot.classList.remove('active');
                 }
             });
         };
@@ -1268,20 +1234,7 @@ class CommandCenter {
             this.resetAutoSlide();
         });
 
-        // Hover effects for buttons
-        prevBtn.addEventListener('mouseenter', () => {
-            prevBtn.style.backgroundColor = 'rgba(255, 115, 0, 0.2)';
-        });
-        prevBtn.addEventListener('mouseleave', () => {
-            prevBtn.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
-        });
-
-        nextBtn.addEventListener('mouseenter', () => {
-            nextBtn.style.backgroundColor = 'rgba(255, 115, 0, 0.2)';
-        });
-        nextBtn.addEventListener('mouseleave', () => {
-            nextBtn.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
-        });
+        // Hover effects are now handled by CSS
 
         // Funkcja do resetowania automatycznego przewijania
         this.resetAutoSlide = () => {
@@ -1308,13 +1261,13 @@ class CommandCenter {
                 const imageUrl = theme === 'dark' ? itemData.darkImage : itemData.lightImage;
 
                 // Update blur layer
-                const blurLayer = item.querySelector('div:first-child');
+                const blurLayer = item.querySelector('.carousel-blur-layer');
                 if (blurLayer) {
                     blurLayer.style.backgroundImage = `url('${imageUrl}')`;
                 }
 
                 // Update main image layer
-                const mainImageLayer = item.querySelector('div:nth-child(2)');
+                const mainImageLayer = item.querySelector('.carousel-main-image');
                 if (mainImageLayer) {
                     mainImageLayer.style.backgroundImage = `url('${imageUrl}')`;
                 }
@@ -1432,6 +1385,76 @@ class CommandCenter {
         addonsContentWrapper.appendChild(grid);
     }
 
+    handleLogin() {
+        const loginModal = document.getElementById('login-modal');
+        const loginForm = document.getElementById('login-form');
+        const loginSuccessView = document.getElementById('login-success-view');
+        const countdownTimer = document.getElementById('countdown-timer');
+        const passcodeInput = document.getElementById('passcode');
+
+        if (!loginModal || !loginForm || !loginSuccessView || !countdownTimer || !passcodeInput) return;
+
+        const enteredPasscode = passcodeInput.value;
+
+        if (enteredPasscode === this.CORRECT_PASSCODE) {
+            // Hide form and show success view
+            loginForm.classList.add('form-hidden');
+            loginSuccessView.classList.remove('hidden');
+
+            // Start countdown
+            let countdown = 3;
+            countdownTimer.textContent = String(countdown);
+
+            this.loginCountdownInterval = setInterval(() => {
+                countdown--;
+                countdownTimer.textContent = String(countdown);
+
+                if (countdown <= 0) {
+                    clearInterval(this.loginCountdownInterval);
+                    // Create and click link to redirect
+                    const link = document.createElement('a');
+                    link.href = 'https://devospanel.carrd.co/';
+                    link.target = '_blank';
+                    link.rel = 'noopener noreferrer';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    this.closeLoginModal();
+                }
+            }, 1000);
+        } else {
+            // Incorrect passcode - show shake animation
+            loginModal.classList.add('shake');
+            setTimeout(() => loginModal.classList.remove('shake'), 500);
+            passcodeInput.value = '';
+            passcodeInput.focus();
+        }
+    }
+
+    openLoginModal() {
+        const loginModal = document.getElementById('login-modal');
+        const loginForm = document.getElementById('login-form');
+        const loginSuccessView = document.getElementById('login-success-view');
+        const passcodeInput = document.getElementById('passcode');
+
+        if (!loginModal || !loginForm) return;
+
+        // Reset state every time modal is opened
+        clearInterval(this.loginCountdownInterval);
+        loginForm.classList.remove('form-hidden');
+        loginSuccessView?.classList.add('hidden');
+        loginForm.reset();
+
+        loginModal.classList.remove('hidden');
+        passcodeInput?.focus();
+    }
+
+    closeLoginModal() {
+        const loginModal = document.getElementById('login-modal');
+        clearInterval(this.loginCountdownInterval);
+        loginModal?.classList.add('hidden');
+    }
+
     destroy() {
         if (this.autoSlideInterval) {
             clearInterval(this.autoSlideInterval);
@@ -1444,6 +1467,9 @@ class CommandCenter {
         }
         if (this.uptimeInterval) {
             clearInterval(this.uptimeInterval);
+        }
+        if (this.loginCountdownInterval) {
+            clearInterval(this.loginCountdownInterval);
         }
     }
 }
@@ -1464,3 +1490,31 @@ window.addEventListener('beforeunload', () => {
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = CommandCenter;
 }
+
+
+
+// Add these to your existing script section
+document.addEventListener('DOMContentLoaded', function () {
+    // Remove draggable attribute from all elements
+    document.querySelectorAll('[draggable="true"]').forEach(el => {
+        el.removeAttribute('draggable');
+    });
+
+    // Prevent dragstart event
+    document.addEventListener('dragstart', function (e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Prevent drop event
+    document.addEventListener('drop', function (e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Prevent dragover event
+    document.addEventListener('dragover', function (e) {
+        e.preventDefault();
+        return false;
+    });
+});
