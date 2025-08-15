@@ -70,7 +70,6 @@ body {
   background: var(--highlight-color);
 }
 
-
 .panel {
   background: var(--panel-bg);
   border: 1px solid var(--border-color);
